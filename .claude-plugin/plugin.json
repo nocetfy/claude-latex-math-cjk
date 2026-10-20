@@ -1,0 +1,61 @@
+{
+  "name": "latex-math",
+  "version": "0.4.0-cjk.1",
+  "description": "Typesets the LaTeX math in Claude's replies as images in the terminal, through the kitty graphics protocol. Chinese and Japanese text in formulas is typeset too.",
+  "author": {
+    "name": "nocetfy"
+  },
+  "homepage": "https://github.com/nocetfy/claude-latex-math-cjk",
+  "repository": "https://github.com/nocetfy/claude-latex-math-cjk",
+  "license": "MIT",
+  "keywords": [
+    "latex",
+    "math",
+    "equations",
+    "cjk",
+    "chinese",
+    "tex",
+    "kitty-graphics",
+    "mod",
+    "terminal",
+    "claude-code"
+  ],
+  "userConfig": {
+    "images": {
+      "type": "string",
+      "title": "Typeset math as images",
+      "description": "auto, on or off. auto draws pictures in kitty and Ghostty and writes Unicode text in other terminals. on draws pictures in a terminal that the plugin does not recognise. off always writes Unicode text. Inside tmux or screen, Claude Code draws no pictures.",
+      "default": "auto"
+    },
+    "inline": {
+      "type": "string",
+      "title": "Inline math",
+      "description": "image or unicode. image draws inline math ($...$) as one-row pictures inside the line. unicode writes it as Unicode text.",
+      "default": "image"
+    },
+    "promptSection": {
+      "type": "boolean",
+      "title": "Tell Claude that math is typeset",
+      "description": "Adds one short section to the system prompt, so Claude writes formulas in LaTeX. It is added only when pictures are on.",
+      "default": true
+    },
+    "scale": {
+      "type": "number",
+      "title": "Size of display math",
+      "description": "A multiple of the default size, from 0.5 to 2.",
+      "default": 1
+    },
+    "weight": {
+      "type": "string",
+      "title": "Weight of formulas",
+      "description": "normal or bold. bold sets every formula in the bold math fonts, whose heavier strokes are easier to read on a dark background.",
+      "default": "normal"
+    },
+    "cacheSizeMB": {
+      "type": "number",
+      "title": "Picture cache limit in MB",
+      "description": "When a session starts, the least recently used pictures are deleted until the cache is under this size.",
+      "default": 100
+    }
+  }
+}
