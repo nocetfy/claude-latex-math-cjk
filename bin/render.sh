@@ -95,11 +95,16 @@ mkdir -p "$cache"
 # characters only typeset characters.
 # LATEX_MATH_CJK_STRETCH widens the system font's characters (default 1, 0.5 to 2): a terminal that
 # draws a picture taller than it is, as one with cells of 1 by 2.27 does at the default cell aspect,
-# makes square characters tall, and 1.135 makes them square again there.
+# makes square characters tall, and 1.135 makes them square again there. LATEX_MATH_CJK_SCALE sizes
+# them (default 1, 0.5 to 2), to match the terminal's own Chinese text.
 cjk_font=${LATEX_MATH_CJK_FONT-}
 cjk_stretch=${LATEX_MATH_CJK_STRETCH:-1}
 [[ $cjk_stretch =~ ^[0-9]+([.][0-9]+)?$ ]] || cjk_stretch=1
-cjk_stretch=$(LC_ALL=C awk -v s="$cjk_stretch" 'BEGIN { if (s < 0.5) s = 0.5; if (s > 2) s = 2; printf "%.3f", s }')
+cjk_scale=${LATEX_MATH_CJK_SCALE:-1}
+[[ $cjk_scale =~ ^[0-9]+([.][0-9]+)?$ ]] || cjk_scale=1
+read -r cjk_stretch cjk_scale < <(LC_ALL=C awk -v s="$cjk_stretch" -v z="$cjk_scale" 'BEGIN {
+  if (s < 0.5) s = 0.5; if (s > 2) s = 2; if (z < 0.5) z = 0.5; if (z > 2) z = 2; printf "%.3f %.3f\n", s, z
+}')
 [[ -n ${LATEX_MATH_CJK_FONT+set} || $(uname) != Darwin ]] || cjk_font='PingFang SC'
 command -v xelatex >/dev/null 2>&1 && command -v pdftocairo >/dev/null 2>&1 || cjk_font=''
 cat >"$work/body.tex"
@@ -117,7 +122,7 @@ if [[ -n $(LC_ALL=C tr -d '\000-\177' <"$work/body.tex") ]]; then
       engine=xelatex
       # The name goes into TeX, so it may hold only letters, digits, spaces, dashes and dots.
       [[ $cjk_font =~ ^[A-Za-z0-9\ .-]+$ ]] || { echo "not a font name: $cjk_font" >&2; exit 2; }
-      packages="\\usepackage{fontspec,xcolor}\\tracinglostchars=3\\newfontfamily\\cjkfont[FakeStretch=$cjk_stretch]{$cjk_font}"
+      packages="\\usepackage{fontspec,xcolor}\\tracinglostchars=3\\newfontfamily\\cjkfont[FakeStretch=$cjk_stretch,Scale=$cjk_scale]{$cjk_font}"
     else
       packages='\usepackage{CJKutf8}\tracinglostchars=3'
     fi

@@ -6,7 +6,7 @@
 
 - On macOS, with `xelatex` and `pdftocairo`, Chinese in a formula is set by XeLaTeX in PingFang SC. `LATEX_MATH_CJK_FONT` names another font, or keeps `gbsn` when empty.
 - `LATEX_MATH_CELL_ASPECT` sets the cell's height over its width (default 2), for terminal fonts whose cells are not 1 by 2.
-- `LATEX_MATH_CJK_STRETCH` widens the Chinese characters set in a system font (default 1).
+- `LATEX_MATH_CJK_STRETCH` widens the Chinese characters set in a system font (default 1), and `LATEX_MATH_CJK_SCALE` sizes them.
 
 ## 0.4.0-cjk.1 (2026-10-20)
 
