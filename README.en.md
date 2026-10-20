@@ -57,7 +57,7 @@ It needs two more TeX Live packages, `cjk` and `arphic`. `install.sh` installs t
 
 On macOS with `xelatex` and `pdftocairo` (poppler), a formula with Chinese is set by XeLaTeX instead, the Chinese in the system font PingFang SC, which has traditional characters too. `LATEX_MATH_CJK_FONT` names another system font (and turns this on elsewhere); set to the empty string, it keeps `gbsn` always.
 
-A terminal whose cells are not 1 by 2 (Noto Sans Mono's are 1 by 2.27) stretches formulas. `LATEX_MATH_CELL_ASPECT`, the cell's height over its width (default 2), corrects that. After changing either variable, clear the old pictures in `~/.cache/claude-latex-math`.
+A terminal whose cells are not 1 by 2 (Noto Sans Mono's are 1 by 2.27) stretches formulas. `LATEX_MATH_CELL_ASPECT`, the cell's height over its width (default 2), corrects that. To keep the math as it is and make only the Chinese square, set `LATEX_MATH_CJK_STRETCH` instead: it widens the Chinese characters (default 1; 1.135 for cells of 1 by 2.27). After changing any of these variables, clear the old pictures in `~/.cache/claude-latex-math`.
 
 ## Requirements
 

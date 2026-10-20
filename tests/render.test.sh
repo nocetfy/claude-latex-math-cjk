@@ -68,6 +68,9 @@ if [[ $(uname) == Darwin ]] && command -v xelatex >/dev/null 2>&1 && command -v 
   render '\[ \text{補} \]' cjk-pingfang >/dev/null || fail "PingFang SC does not render a traditional character"
   read -r cpb rpb <<<"$(render '\(\text{金额} \le x\)' cjk-pingfang-bold inline 1 bold)"
   ((rpb == 1)) || fail "bold inline Chinese text in PingFang SC takes $rpb rows"
+  read -r w1 _ <<<"$(render '\[ \text{补偿金额} \]' cjk-narrow >/dev/null; size "$cache/cjk-narrow.png")"
+  read -r w2 _ <<<"$(printf '%s' '\[ \text{补偿金额} \]' | LATEX_MATH_CJK_STRETCH=1.5 bin/render.sh "$cache" cjk-wide d8d8d8 >/dev/null; size "$cache/cjk-wide.png")"
+  ((w2 > w1)) || fail "a stretch of 1.5 does not widen the Chinese text: $w1 and $w2 pixels"
 fi
 
 touch -t 200001010000 "$cache/euler.png"

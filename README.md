@@ -57,7 +57,7 @@ cd claude-latex-math-cjk
 
 在 macOS 上，如果装了 `xelatex` 和 `pdftocairo`（poppler），含中文的公式改用 XeLaTeX 排版，中文用系统字体苹方（PingFang SC），繁体字也能显示。环境变量 `LATEX_MATH_CJK_FONT` 可以换成别的系统字体（其他系统上设置它也会走这条路）；设为空字符串则始终用 `gbsn`。
 
-终端的字符格子不是 1:2 时（比如 Noto Sans Mono 是 1:2.27），公式会被竖向拉伸。设置 `LATEX_MATH_CELL_ASPECT`（格子高除以宽，默认 2）可以修正。改了这两个变量以后，要清掉 `~/.cache/claude-latex-math` 里的旧图。
+终端的字符格子不是 1:2 时（比如 Noto Sans Mono 是 1:2.27），公式会被竖向拉伸。设置 `LATEX_MATH_CELL_ASPECT`（格子高除以宽，默认 2）可以修正；如果只想让汉字不变形、数学公式保持原样，就不设它，改设 `LATEX_MATH_CJK_STRETCH`（汉字横向加宽的倍数，默认 1，1:2.27 的格子用 1.135）。改了这些变量以后，要清掉 `~/.cache/claude-latex-math` 里的旧图。
 
 ## 要求
 

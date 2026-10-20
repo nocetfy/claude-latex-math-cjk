@@ -93,7 +93,13 @@ mkdir -p "$cache"
 # Without one (the variable empty, another system, or no xelatex or pdftocairo), each run is set in a
 # CJK environment of CJKutf8, from the Arphic font gbsn (TeX Live packages cjk and arphic); its active
 # characters only typeset characters.
+# LATEX_MATH_CJK_STRETCH widens the system font's characters (default 1, 0.5 to 2): a terminal that
+# draws a picture taller than it is, as one with cells of 1 by 2.27 does at the default cell aspect,
+# makes square characters tall, and 1.135 makes them square again there.
 cjk_font=${LATEX_MATH_CJK_FONT-}
+cjk_stretch=${LATEX_MATH_CJK_STRETCH:-1}
+[[ $cjk_stretch =~ ^[0-9]+([.][0-9]+)?$ ]] || cjk_stretch=1
+cjk_stretch=$(LC_ALL=C awk -v s="$cjk_stretch" 'BEGIN { if (s < 0.5) s = 0.5; if (s > 2) s = 2; printf "%.3f", s }')
 [[ -n ${LATEX_MATH_CJK_FONT+set} || $(uname) != Darwin ]] || cjk_font='PingFang SC'
 command -v xelatex >/dev/null 2>&1 && command -v pdftocairo >/dev/null 2>&1 || cjk_font=''
 cat >"$work/body.tex"
@@ -111,7 +117,7 @@ if [[ -n $(LC_ALL=C tr -d '\000-\177' <"$work/body.tex") ]]; then
       engine=xelatex
       # The name goes into TeX, so it may hold only letters, digits, spaces, dashes and dots.
       [[ $cjk_font =~ ^[A-Za-z0-9\ .-]+$ ]] || { echo "not a font name: $cjk_font" >&2; exit 2; }
-      packages="\\usepackage{fontspec,xcolor}\\tracinglostchars=3\\newfontfamily\\cjkfont{$cjk_font}"
+      packages="\\usepackage{fontspec,xcolor}\\tracinglostchars=3\\newfontfamily\\cjkfont[FakeStretch=$cjk_stretch]{$cjk_font}"
     else
       packages='\usepackage{CJKutf8}\tracinglostchars=3'
     fi
