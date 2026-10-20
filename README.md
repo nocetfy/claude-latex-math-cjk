@@ -55,9 +55,9 @@ cd claude-latex-math-cjk
 
 它额外需要 TeX Live 的 `cjk` 和 `arphic` 两个宏包，`install.sh` 会和其他依赖一起装好。
 
-在 macOS 上，如果装了 `xelatex` 和 `pdftocairo`（poppler），含中文的公式改用 XeLaTeX 排版，中文用系统字体苹方（PingFang SC），繁体字也能显示。环境变量 `LATEX_MATH_CJK_FONT` 可以换成别的系统字体（其他系统上设置它也会走这条路）；设为空字符串则始终用 `gbsn`。
+在 macOS 上，如果装了 `xelatex` 和 `pdftocairo`（poppler），含中文的公式改用 XeLaTeX 排版，中文用系统字体苹方（PingFang SC），繁体字也能显示。选项 `cjkFont` 可以换成别的系统字体（其他系统上设置它也会走这条路），设为 `none` 则始终用 `gbsn`。
 
-终端的字符格子不是 1:2 时（比如 Noto Sans Mono 是 1:2.27），公式会被竖向拉伸。设置 `LATEX_MATH_CELL_ASPECT`（格子高除以宽，默认 2）可以修正；如果只想让汉字不变形、数学公式保持原样，就不设它，改设 `LATEX_MATH_CJK_STRETCH`（汉字横向加宽的倍数，默认 1，1:2.27 的格子用 1.135）。`LATEX_MATH_CJK_SCALE` 调汉字大小（默认 1），让它和终端正文的汉字一样大。改了这些变量以后，要清掉 `~/.cache/claude-latex-math` 里的旧图。
+终端的字符格子不是 1:2 时（比如 Noto Sans Mono 是 1:2.27），公式会被竖向拉伸。选项 `cellAspect` 可以修正；如果只想让汉字不变形、数学公式保持原样，就不改它，改设 `cjkStretch`（1:2.27 的格子用 1.135）。`cjkScale` 调汉字大小，让它和终端正文的汉字一样大。这些选项都参与图片缓存的文件名，改了不用手动清缓存。
 
 ## 要求
 
@@ -98,6 +98,10 @@ cd claude-latex-math-cjk
 | `promptSection` | `true`、`false` | `true` | 是否在系统提示词里告诉 Claude 公式会被渲染。 |
 | `scale` | 0.5 到 2 | 1 | 独立公式的大小，是默认大小的倍数。 |
 | `weight` | `normal`、`bold` | `normal` | `bold` 让所有公式用粗体数学字体，笔画更粗，深色背景下更清楚。 |
+| `cellAspect` | 1 到 3 | 2 | 终端字符格子的高除以宽。和实际不符时图片会被拉伸或压扁。 |
+| `cjkFont` | `auto`、`none` 或系统字体名 | `auto` | 公式里中文的字体。`auto` 在 macOS 上是苹方，其他系统上是 `gbsn`；`none` 始终是 `gbsn`。系统字体需要 `xelatex` 和 `pdftocairo`。 |
+| `cjkStretch` | 0.5 到 2 | 1 | 系统字体的汉字横向加宽的倍数，抵消终端把图片竖向拉长。 |
+| `cjkScale` | 0.5 到 2 | 1 | 系统字体的汉字大小，用来和终端正文的汉字对齐。 |
 | `cacheSizeMB` | 1 到 10000 | 100 | 图片缓存的上限，单位 MB。 |
 
 ## 显示效果

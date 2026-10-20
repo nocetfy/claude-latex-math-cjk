@@ -52,7 +52,7 @@ read -r cx rx <<<"$(render '\(x\)' x inline)"
 read -r ch rh <<<"$(printf '%s' '\(x\)' | LATEX_MATH_RESOLUTION=2 bin/render.sh "$cache" x-hires d8d8d8 inline)"
 [[ $(size "$cache/x-hires.png") == "$((ch * 40)) $((rh * 80))" ]] || fail "resolution 2 does not double the cell"
 
-read -r ca ra <<<"$(printf '%s' '\(x\)' | LATEX_MATH_CELL_ASPECT=2.27 bin/render.sh "$cache" x-tall d8d8d8 inline)"
+read -r ca _ <<<"$(printf '%s' '\(x\)' | bin/render.sh "$cache" x-tall d8d8d8 inline 1 normal 2.27)"
 [[ $(size "$cache/x-tall.png") == "$((ca * 20)) 45" ]] || fail "cell aspect 2.27 does not make a cell 45 pixels tall"
 
 read -r cz rz <<<"$(render '\[ \text{补偿} = \alpha \le x \]' cjk)"
@@ -60,18 +60,18 @@ read -r cz rz <<<"$(render '\[ \text{补偿} = \alpha \le x \]' cjk)"
 [[ $(render '\(\text{金额} \le x\)' cjk-inline inline) == *' 1' ]] || fail "inline Chinese text takes more than one row"
 printf '%s' '\[ \text{补偿} = \alpha \]' | bin/render.sh "$cache" cjk-bold d8d8d8 display 1 bold >/dev/null ||
   fail "a bold formula with Chinese text does not render"
-if error=$(LATEX_MATH_CJK_FONT='' render '\[ \text{補} \]' cjk-traditional 2>&1); then
+if error=$(printf '%s' '\[ \text{補} \]' | bin/render.sh "$cache" cjk-traditional d8d8d8 display 1 normal 2 none 2>&1); then
   fail "a character outside gbsn renders, so it would be drawn wrong or dropped"
 fi
 if [[ $(uname) == Darwin ]] && command -v xelatex >/dev/null 2>&1 && command -v pdftocairo >/dev/null 2>&1; then
   # PingFang SC has the traditional characters that gbsn lacks.
   render '\[ \text{補} \]' cjk-pingfang >/dev/null || fail "PingFang SC does not render a traditional character"
-  read -r cpb rpb <<<"$(render '\(\text{金额} \le x\)' cjk-pingfang-bold inline 1 bold)"
+  read -r _ rpb <<<"$(render '\(\text{金额} \le x\)' cjk-pingfang-bold inline 1 bold)"
   ((rpb == 1)) || fail "bold inline Chinese text in PingFang SC takes $rpb rows"
   read -r w1 _ <<<"$(render '\[ \text{补偿金额} \]' cjk-narrow >/dev/null; size "$cache/cjk-narrow.png")"
-  read -r w2 _ <<<"$(printf '%s' '\[ \text{补偿金额} \]' | LATEX_MATH_CJK_STRETCH=1.5 bin/render.sh "$cache" cjk-wide d8d8d8 >/dev/null; size "$cache/cjk-wide.png")"
+  read -r w2 _ <<<"$(printf '%s' '\[ \text{补偿金额} \]' | bin/render.sh "$cache" cjk-wide d8d8d8 display 1 normal 2 auto 1.5 >/dev/null; size "$cache/cjk-wide.png")"
   ((w2 > w1)) || fail "a stretch of 1.5 does not widen the Chinese text: $w1 and $w2 pixels"
-  read -r w3 _ <<<"$(printf '%s' '\[ \text{补偿金额} \]' | LATEX_MATH_CJK_SCALE=0.7 bin/render.sh "$cache" cjk-small d8d8d8 >/dev/null; size "$cache/cjk-small.png")"
+  read -r w3 _ <<<"$(printf '%s' '\[ \text{补偿金额} \]' | bin/render.sh "$cache" cjk-small d8d8d8 display 1 normal 2 auto 1 0.7 >/dev/null; size "$cache/cjk-small.png")"
   ((w3 < w1)) || fail "a scale of 0.7 does not shrink the Chinese text: $w1 and $w3 pixels"
 fi
 

@@ -12,6 +12,14 @@ export type Settings = {
   scale: number
   /** bold: every formula is set in the bold math fonts, whose strokes are heavier. */
   weight: 'normal' | 'bold'
+  /** The height of a terminal cell over its width, from 1 to 3. */
+  cellAspect: number
+  /** auto, none or a system font's name, for Chinese in formulas. */
+  cjkFont: string
+  /** How much the Chinese characters in a system font are widened, from 0.5 to 2. */
+  cjkStretch: number
+  /** The size of the Chinese characters in a system font, from 0.5 to 2. */
+  cjkScale: number
   /** The largest size of the picture cache, in bytes. */
   cacheBytes: number
 }
@@ -31,6 +39,11 @@ export function readSettings(options: PluginOptions): Settings {
     promptSection: options.promptSection !== false,
     scale: between(options.scale, 0.5, 2, 1),
     weight: oneOf(options.weight, ['normal', 'bold'], 'normal'),
+    cellAspect: between(options.cellAspect, 1, 3, 2),
+    // The name goes into TeX, so it may hold only letters, digits, spaces, dashes and dots.
+    cjkFont: typeof options.cjkFont === 'string' && /^[A-Za-z0-9 .-]+$/.test(options.cjkFont.trim()) ? options.cjkFont.trim() : 'auto',
+    cjkStretch: between(options.cjkStretch, 0.5, 2, 1),
+    cjkScale: between(options.cjkScale, 0.5, 2, 1),
     cacheBytes: between(options.cacheSizeMB, 1, 10000, 100) * 1024 * 1024,
   }
 }

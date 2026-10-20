@@ -55,9 +55,9 @@ Chinese and Japanese text in a formula, such as `\text{补偿金额} \le x`, is 
 
 It needs two more TeX Live packages, `cjk` and `arphic`. `install.sh` installs them with everything else.
 
-On macOS with `xelatex` and `pdftocairo` (poppler), a formula with Chinese is set by XeLaTeX instead, the Chinese in the system font PingFang SC, which has traditional characters too. `LATEX_MATH_CJK_FONT` names another system font (and turns this on elsewhere); set to the empty string, it keeps `gbsn` always.
+On macOS with `xelatex` and `pdftocairo` (poppler), a formula with Chinese is set by XeLaTeX instead, the Chinese in the system font PingFang SC, which has traditional characters too. The `cjkFont` option names another system font (and turns this on elsewhere); `none` keeps `gbsn` always.
 
-A terminal whose cells are not 1 by 2 (Noto Sans Mono's are 1 by 2.27) stretches formulas. `LATEX_MATH_CELL_ASPECT`, the cell's height over its width (default 2), corrects that. To keep the math as it is and make only the Chinese square, set `LATEX_MATH_CJK_STRETCH` instead: it widens the Chinese characters (default 1; 1.135 for cells of 1 by 2.27). `LATEX_MATH_CJK_SCALE` sizes the Chinese (default 1), to match the terminal's own Chinese text. After changing any of these variables, clear the old pictures in `~/.cache/claude-latex-math`.
+A terminal whose cells are not 1 by 2 (Noto Sans Mono's are 1 by 2.27) stretches formulas. The `cellAspect` option corrects that. To keep the math as it is and make only the Chinese square, set `cjkStretch` instead (1.135 for cells of 1 by 2.27). `cjkScale` sizes the Chinese, to match the terminal's own Chinese text. Each of these options is part of the picture's file name, so the cache needs no clearing after a change.
 
 ## Requirements
 
@@ -98,6 +98,10 @@ Change the options in `/config`, where each option is one row under the plugin's
 | `promptSection` | `true`, `false` | `true` | Whether the system prompt tells Claude that math is typeset. |
 | `scale` | 0.5 to 2 | 1 | The size of display math, as a multiple of the default size. |
 | `weight` | `normal`, `bold` | `normal` | `bold` sets every formula in the bold math fonts. The heavier strokes are easier to read on a dark background. |
+| `cellAspect` | 1 to 3 | 2 | The height of a terminal cell over its width. A wrong value draws pictures stretched or squeezed. |
+| `cjkFont` | `auto`, `none` or a system font's name | `auto` | The font for Chinese in formulas. `auto` is PingFang SC on macOS and `gbsn` elsewhere; `none` is always `gbsn`. A system font needs `xelatex` and `pdftocairo`. |
+| `cjkStretch` | 0.5 to 2 | 1 | Widens the Chinese characters in a system font, against a terminal that draws pictures tall. |
+| `cjkScale` | 0.5 to 2 | 1 | The size of the Chinese characters in a system font, to match the terminal's own text. |
 | `cacheSizeMB` | 1 to 10000 | 100 | The largest size of the image cache, in MB. |
 
 ## What you see

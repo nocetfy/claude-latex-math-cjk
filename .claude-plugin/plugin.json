@@ -51,6 +51,30 @@
       "description": "normal or bold. bold sets every formula in the bold math fonts, whose heavier strokes are easier to read on a dark background.",
       "default": "normal"
     },
+    "cellAspect": {
+      "type": "number",
+      "title": "Cell aspect of the terminal",
+      "description": "The height of a terminal cell over its width, from 1 to 3. A picture made for another aspect is drawn stretched or squeezed. Noto Sans Mono, for one, has cells of 1 by 2.27.",
+      "default": 2
+    },
+    "cjkFont": {
+      "type": "string",
+      "title": "Font for Chinese in formulas",
+      "description": "auto, none or the name of a system font. auto is PingFang SC on macOS and the Arphic font gbsn elsewhere; none is always gbsn. A system font needs xelatex and pdftocairo.",
+      "default": "auto"
+    },
+    "cjkStretch": {
+      "type": "number",
+      "title": "Width of Chinese in formulas",
+      "description": "Widens the Chinese characters set in a system font, from 0.5 to 2. In a terminal that draws pictures taller than they are, it keeps them square: 1.135 for cells of 1 by 2.27 at a cell aspect of 2.",
+      "default": 1
+    },
+    "cjkScale": {
+      "type": "number",
+      "title": "Size of Chinese in formulas",
+      "description": "The size of the Chinese characters set in a system font, from 0.5 to 2, to match the terminal's own Chinese text.",
+      "default": 1
+    },
     "cacheSizeMB": {
       "type": "number",
       "title": "Picture cache limit in MB",

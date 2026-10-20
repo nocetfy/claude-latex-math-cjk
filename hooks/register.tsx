@@ -149,10 +149,27 @@ async function render($: EngineInterface, tex: string, foreground: string, mode:
   const dir = await (cache ??= cacheDir($))
   const scale = mode === 'display' ? settings.scale : 1
   // The stem names everything that changes the pixels. A default leaves no mark, so its pictures keep their names.
-  const variant = `${foreground}${scale === 1 ? '' : `@${scale}`}${settings.weight === 'bold' ? '+bold' : ''}`
+  const { cellAspect, cjkFont, cjkStretch, cjkScale } = settings
+  const variant =
+    `${foreground}${scale === 1 ? '' : `@${scale}`}${settings.weight === 'bold' ? '+bold' : ''}` +
+    `${cellAspect === 2 ? '' : `^${cellAspect}`}` +
+    `${cjkFont === 'auto' && cjkStretch === 1 && cjkScale === 1 ? '' : `~${cjkFont}/${cjkStretch}/${cjkScale}`}`
   const stem = stemOf(variant, tex)
   const ran = await $.process.run(
-    ['bash', `${$.plugin.root}/bin/render.sh`, dir, stem, foreground, mode, String(scale), settings.weight],
+    [
+      'bash',
+      `${$.plugin.root}/bin/render.sh`,
+      dir,
+      stem,
+      foreground,
+      mode,
+      String(scale),
+      settings.weight,
+      String(cellAspect),
+      cjkFont,
+      String(cjkStretch),
+      String(cjkScale),
+    ],
     { stdin: tex },
   )
   const [columns, rows] = ran.stdout.trim().split(' ').map(Number)

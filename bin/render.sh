@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 # Renders one LaTeX math body (stdin) to a transparent PNG sized to whole terminal cells.
 # usage: render.sh <cache-dir> <stem> <foreground-rrggbb> [display|inline] [scale] [normal|bold]
+#          [cell-aspect] [cjk-font] [cjk-stretch] [cjk-scale]
 #        render.sh --check
 #        render.sh --preamble
 # stdout: "<columns> <rows>"; the PNG is <cache-dir>/<stem>.png. A failure prints the TeX error and exits 1.
 # A display formula takes the rows it needs, at scale times the default size (0.5 to 2). An inline
 # formula takes one row, with its baseline on the text's. bold sets the formula in the bold math fonts.
+# The last four are the plugin options cellAspect, cjkFont, cjkStretch and cjkScale; see below.
 # --check prints the tools and LaTeX packages that are missing, and exits 1 when any are.
 # --preamble prints the LaTeX preamble of every formula, for tools/commands.py.
 #
@@ -48,6 +50,7 @@ if [[ ${1-} == --check ]]; then
 fi
 
 cache=$1 stem=$2 fg=$3 mode=${4:-display} scale=${5:-1} weight=${6:-normal}
+aspect=${7:-2} cjk_font=${8:-auto} cjk_stretch=${9:-1} cjk_scale=${10:-1}
 [[ $fg =~ ^[0-9a-fA-F]{6}$ ]] || { echo "not a colour: $fg" >&2; exit 2; }
 [[ $scale =~ ^[0-9]+([.][0-9]+)?$ ]] || scale=1
 res=${LATEX_MATH_RESOLUTION:-1}
@@ -71,9 +74,8 @@ fi
 # 262 dpi makes 11pt of TeX one row tall, so 10pt math has the x-height of the terminal's text.
 # BASELINE is where a monospace font puts its baseline in the cell, in pixels from the top.
 # SQUEEZE is how many pixels over whole cells an inline formula is pressed into them.
-# LATEX_MATH_CELL_ASPECT is the cell's height over its width (default 2, 1 to 3): Noto Sans Mono, for
-# one, has cells of 1 by 2.27, and a picture made for 1 by 2 is drawn about 12% too tall there.
-aspect=${LATEX_MATH_CELL_ASPECT:-2}
+# The cell aspect is the cell's height over its width (default 2, 1 to 3): Noto Sans Mono, for one,
+# has cells of 1 by 2.27, and a picture made for 1 by 2 is drawn about 13% too tall there.
 [[ $aspect =~ ^[0-9]+([.][0-9]+)?$ ]] || aspect=2
 read -r CELL_W CELL_H DPI PAD_Y BASELINE SQUEEZE < <(LC_ALL=C awk -v r="$res" -v s="$scale" -v m="$mode" -v a="$aspect" 'BEGIN {
   z = (m == "display") ? s : 1; if (z < 0.5) z = 0.5; if (z > 2) z = 2
@@ -88,28 +90,30 @@ mkdir -p "$cache"
 # pdfTeX has no font for Chinese. Each run of Chinese or Japanese characters is set as text, and every
 # other character stays as it was. A character that the font lacks is an error, so no character is
 # dropped or drawn wrong, and a formula without such a run gets the same file as before.
-# With a system font, the formula is set by XeLaTeX and the runs in that font: LATEX_MATH_CJK_FONT
-# names it, and on macOS it is PingFang SC when the variable is unset. pdftocairo makes the picture.
-# Without one (the variable empty, another system, or no xelatex or pdftocairo), each run is set in a
-# CJK environment of CJKutf8, from the Arphic font gbsn (TeX Live packages cjk and arphic); its active
-# characters only typeset characters.
-# LATEX_MATH_CJK_STRETCH widens the system font's characters (default 1, 0.5 to 2): a terminal that
-# draws a picture taller than it is, as one with cells of 1 by 2.27 does at the default cell aspect,
-# makes square characters tall, and 1.135 makes them square again there. LATEX_MATH_CJK_SCALE sizes
-# them (default 1, 0.5 to 2), to match the terminal's own Chinese text.
-cjk_font=${LATEX_MATH_CJK_FONT-}
-cjk_stretch=${LATEX_MATH_CJK_STRETCH:-1}
+# With a system font, the formula is set by XeLaTeX and the runs in that font: cjk-font names it, and
+# auto is PingFang SC on macOS. pdftocairo makes the picture. Without one (none, auto on another
+# system, or no xelatex or pdftocairo), each run is set in a CJK environment of CJKutf8, from the
+# Arphic font gbsn (TeX Live packages cjk and arphic); its active characters only typeset characters.
+# cjk-stretch widens the system font's characters (default 1, 0.5 to 2): a terminal that draws a
+# picture taller than it is, as one with cells of 1 by 2.27 does at the default cell aspect, makes
+# square characters tall, and 1.135 makes them square again there. cjk-scale sizes them (default 1,
+# 0.5 to 2), to match the terminal's own Chinese text.
 [[ $cjk_stretch =~ ^[0-9]+([.][0-9]+)?$ ]] || cjk_stretch=1
-cjk_scale=${LATEX_MATH_CJK_SCALE:-1}
 [[ $cjk_scale =~ ^[0-9]+([.][0-9]+)?$ ]] || cjk_scale=1
 read -r cjk_stretch cjk_scale < <(LC_ALL=C awk -v s="$cjk_stretch" -v z="$cjk_scale" 'BEGIN {
   if (s < 0.5) s = 0.5; if (s > 2) s = 2; if (z < 0.5) z = 0.5; if (z > 2) z = 2; printf "%.3f %.3f\n", s, z
 }')
-[[ -n ${LATEX_MATH_CJK_FONT+set} || $(uname) != Darwin ]] || cjk_font='PingFang SC'
+if [[ $cjk_font == auto ]]; then
+  cjk_font=''
+  [[ $(uname) != Darwin ]] || cjk_font='PingFang SC'
+fi
+[[ $cjk_font != none ]] || cjk_font=''
 command -v xelatex >/dev/null 2>&1 && command -v pdftocairo >/dev/null 2>&1 || cjk_font=''
 cat >"$work/body.tex"
 engine=latex packages=''
 if [[ -n $(LC_ALL=C tr -d '\000-\177' <"$work/body.tex") ]]; then
+  # $1 is perl's, so the quotes keep the shell from expanding it.
+  # shellcheck disable=SC2016
   if [[ -n $cjk_font ]]; then
     wrap='{\\text{\\cjkfont $1}}'
   else
@@ -188,7 +192,7 @@ if [[ $engine == xelatex ]]; then
   convert "$work/raw.png" -crop "${tw}x${th}+${tx}+${ty}" +repage "PNG32:$work/f.png"
   if [[ $mode == inline ]]; then
     # The baseline is the border and the box's height below the page's top; 72.27 TeX points are an inch.
-    read -r bh bd < <(sed -n 's|^MATHBOX \([0-9.]*\)pt/\([0-9.]*\)pt.*|\1 \2|p' "$work/f.log")
+    read -r bh _ < <(sed -n 's|^MATHBOX \([0-9.]*\)pt/\([0-9.]*\)pt.*|\1 \2|p' "$work/f.log")
     [[ -n ${bh-} ]] || { echo 'xelatex reported no box' >&2; exit 1; }
     LC_ALL=C awk -v h="$bh" -v dpi="$DPI" -v ty="$ty" -v th="$th" 'BEGIN {
       b = int((4 + h) * dpi / 72.27 + 0.5); printf "depth=%d height=%d\n", ty + th - b, b - ty
