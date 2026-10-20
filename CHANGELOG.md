@@ -6,7 +6,7 @@
 
 - On macOS, with `xelatex` and `pdftocairo`, Chinese in a formula is set by XeLaTeX in PingFang SC. The `cjkFont` option names another font, or keeps `gbsn` with `none`.
 - The `cellAspect` option sets the cell's height over its width (default 2), for terminal fonts whose cells are not 1 by 2.
-- The `cjkStretch` option widens the Chinese characters set in a system font, and `cjkScale` sizes them. These options and `cellAspect` are part of the picture's file name.
+- The `cjkStretch` option widens the Chinese characters set in a system font, and `cjkScale` sizes them (defaults 1.135 and 0.8, for a terminal font like Noto Sans Mono). These options and `cellAspect` are part of the picture's file name.
 
 ## 0.4.0-cjk.1 (2026-10-20)
 

@@ -57,7 +57,7 @@ It needs two more TeX Live packages, `cjk` and `arphic`. `install.sh` installs t
 
 On macOS with `xelatex` and `pdftocairo` (poppler), a formula with Chinese is set by XeLaTeX instead, the Chinese in the system font PingFang SC, which has traditional characters too. The `cjkFont` option names another system font (and turns this on elsewhere); `none` keeps `gbsn` always.
 
-A terminal whose cells are not 1 by 2 (Noto Sans Mono's are 1 by 2.27) stretches formulas. The `cellAspect` option corrects that. To keep the math as it is and make only the Chinese square, set `cjkStretch` instead (1.135 for cells of 1 by 2.27). `cjkScale` sizes the Chinese, to match the terminal's own Chinese text. Each of these options is part of the picture's file name, so the cache needs no clearing after a change.
+A terminal whose cells are not 1 by 2 (Noto Sans Mono's are 1 by 2.27) stretches formulas. The `cellAspect` option corrects that. To keep the math as it is and make only the Chinese square, set `cjkStretch` instead (the default 1.135 is for cells of 1 by 2.27; 1 is for cells of 1 by 2). `cjkScale` sizes the Chinese, to match the terminal's own Chinese text. Each of these options is part of the picture's file name, so the cache needs no clearing after a change.
 
 ## Requirements
 
@@ -100,8 +100,8 @@ Change the options in `/config`, where each option is one row under the plugin's
 | `weight` | `normal`, `bold` | `normal` | `bold` sets every formula in the bold math fonts. The heavier strokes are easier to read on a dark background. |
 | `cellAspect` | 1 to 3 | 2 | The height of a terminal cell over its width. A wrong value draws pictures stretched or squeezed. |
 | `cjkFont` | `auto`, `none` or a system font's name | `auto` | The font for Chinese in formulas. `auto` is PingFang SC on macOS and `gbsn` elsewhere; `none` is always `gbsn`. A system font needs `xelatex` and `pdftocairo`. |
-| `cjkStretch` | 0.5 to 2 | 1 | Widens the Chinese characters in a system font, against a terminal that draws pictures tall. |
-| `cjkScale` | 0.5 to 2 | 1 | The size of the Chinese characters in a system font, to match the terminal's own text. |
+| `cjkStretch` | 0.5 to 2 | 1.135 | Widens the Chinese characters in a system font, against a terminal that draws pictures tall. The default is for cells of 1 by 2.27 (Noto Sans Mono); use 1 for cells of 1 by 2. |
+| `cjkScale` | 0.5 to 2 | 0.8 | The size of the Chinese characters in a system font, to match the terminal's own text. |
 | `cacheSizeMB` | 1 to 10000 | 100 | The largest size of the image cache, in MB. |
 
 ## What you see

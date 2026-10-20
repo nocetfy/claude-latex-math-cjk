@@ -151,8 +151,8 @@ test('options are read with defaults, and numbers are held to their range', () =
     weight: 'normal',
     cellAspect: 2,
     cjkFont: 'auto',
-    cjkStretch: 1,
-    cjkScale: 1,
+    cjkStretch: 1.135,
+    cjkScale: 0.8,
     cacheBytes: 100 * 1024 * 1024,
   })
   expect(
@@ -165,8 +165,8 @@ test('options are read with defaults, and numbers are held to their range', () =
     weight: 'bold',
     cellAspect: 2,
     cjkFont: 'auto',
-    cjkStretch: 1,
-    cjkScale: 1,
+    cjkStretch: 1.135,
+    cjkScale: 0.8,
     cacheBytes: 1024 * 1024,
   })
   expect(readSettings({ cellAspect: 9, cjkFont: ' PingFang SC ', cjkStretch: 0, cjkScale: 0.8 })).toMatchObject({
@@ -424,8 +424,8 @@ test('a reply draws display math as images, inline math as one-row images, and t
     'normal',
     '2',
     'auto',
-    '1',
-    '1',
+    '1.135',
+    '0.8',
   ])
   expect(renders().find(run => run.stdin === '\\(\\beta_0\\)')?.argv[5]).toBe('inline')
   // The paragraph around the inline formula is drawn word by word.
@@ -600,8 +600,8 @@ test('scale=1.5 renders display math larger, in a file of its own', { options: {
     'normal',
     '2',
     'auto',
-    '1',
-    '1',
+    '1.135',
+    '0.8',
   ])
   expect(renders().find(run => run.argv[5] === 'inline')?.argv[6]).toBe('1')
 })
@@ -611,21 +611,21 @@ test('weight=bold renders every formula bold, in a file of its own', { options: 
   engineDraws(on)
   await $.ui.mount({ ...MESSAGE, props: { text: 'For $x$:\n\n$$y$$', isFirstOfReply: true } })
   expect(renders().map(run => run.argv.slice(3))).toEqual([
-    [stemOf('cdf2e3+bold', '\\(x\\)'), 'cdf2e3', 'inline', '1', 'bold', '2', 'auto', '1', '1'],
-    [stemOf('cdf2e3+bold', '\\[ y \\]'), 'cdf2e3', 'display', '1', 'bold', '2', 'auto', '1', '1'],
+    [stemOf('cdf2e3+bold', '\\(x\\)'), 'cdf2e3', 'inline', '1', 'bold', '2', 'auto', '1.135', '0.8'],
+    [stemOf('cdf2e3+bold', '\\[ y \\]'), 'cdf2e3', 'display', '1', 'bold', '2', 'auto', '1.135', '0.8'],
   ])
   expect(stemOf('cdf2e3+bold', '\\[ y \\]')).not.toBe(stemOf('cdf2e3', '\\[ y \\]'))
 })
 
 test(
   'the cell aspect and the Chinese font options go to the renderer, in files of their own',
-  { options: { cellAspect: 2.27, cjkFont: 'Hiragino Sans GB', cjkStretch: 1.135, cjkScale: 0.8 } },
+  { options: { cellAspect: 2.27, cjkFont: 'Hiragino Sans GB', cjkStretch: 1, cjkScale: 0.9 } },
   async ($, on) => {
     const { renders } = machine(on)
     engineDraws(on)
     await $.ui.mount({ ...MESSAGE, props: { text: '$$y$$', isFirstOfReply: true } })
     expect(renders().map(run => run.argv.slice(3))).toEqual([
-      [stemOf('cdf2e3^2.27~Hiragino Sans GB/1.135/0.8', '\\[ y \\]'), 'cdf2e3', 'display', '1', 'normal', '2.27', 'Hiragino Sans GB', '1.135', '0.8'],
+      [stemOf('cdf2e3^2.27~Hiragino Sans GB/1/0.9', '\\[ y \\]'), 'cdf2e3', 'display', '1', 'normal', '2.27', 'Hiragino Sans GB', '1', '0.9'],
     ])
   },
 )

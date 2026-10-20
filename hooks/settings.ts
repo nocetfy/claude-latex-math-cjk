@@ -42,8 +42,8 @@ export function readSettings(options: PluginOptions): Settings {
     cellAspect: between(options.cellAspect, 1, 3, 2),
     // The name goes into TeX, so it may hold only letters, digits, spaces, dashes and dots.
     cjkFont: typeof options.cjkFont === 'string' && /^[A-Za-z0-9 .-]+$/.test(options.cjkFont.trim()) ? options.cjkFont.trim() : 'auto',
-    cjkStretch: between(options.cjkStretch, 0.5, 2, 1),
-    cjkScale: between(options.cjkScale, 0.5, 2, 1),
+    cjkStretch: between(options.cjkStretch, 0.5, 2, 1.135),
+    cjkScale: between(options.cjkScale, 0.5, 2, 0.8),
     cacheBytes: between(options.cacheSizeMB, 1, 10000, 100) * 1024 * 1024,
   }
 }

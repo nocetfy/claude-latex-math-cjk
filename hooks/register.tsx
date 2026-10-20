@@ -153,7 +153,7 @@ async function render($: EngineInterface, tex: string, foreground: string, mode:
   const variant =
     `${foreground}${scale === 1 ? '' : `@${scale}`}${settings.weight === 'bold' ? '+bold' : ''}` +
     `${cellAspect === 2 ? '' : `^${cellAspect}`}` +
-    `${cjkFont === 'auto' && cjkStretch === 1 && cjkScale === 1 ? '' : `~${cjkFont}/${cjkStretch}/${cjkScale}`}`
+    `${cjkFont === 'auto' && cjkStretch === 1.135 && cjkScale === 0.8 ? '' : `~${cjkFont}/${cjkStretch}/${cjkScale}`}`
   const stem = stemOf(variant, tex)
   const ran = await $.process.run(
     [

@@ -50,7 +50,7 @@ if [[ ${1-} == --check ]]; then
 fi
 
 cache=$1 stem=$2 fg=$3 mode=${4:-display} scale=${5:-1} weight=${6:-normal}
-aspect=${7:-2} cjk_font=${8:-auto} cjk_stretch=${9:-1} cjk_scale=${10:-1}
+aspect=${7:-2} cjk_font=${8:-auto} cjk_stretch=${9:-1.135} cjk_scale=${10:-0.8}
 [[ $fg =~ ^[0-9a-fA-F]{6}$ ]] || { echo "not a colour: $fg" >&2; exit 2; }
 [[ $scale =~ ^[0-9]+([.][0-9]+)?$ ]] || scale=1
 res=${LATEX_MATH_RESOLUTION:-1}
@@ -94,12 +94,12 @@ mkdir -p "$cache"
 # auto is PingFang SC on macOS. pdftocairo makes the picture. Without one (none, auto on another
 # system, or no xelatex or pdftocairo), each run is set in a CJK environment of CJKutf8, from the
 # Arphic font gbsn (TeX Live packages cjk and arphic); its active characters only typeset characters.
-# cjk-stretch widens the system font's characters (default 1, 0.5 to 2): a terminal that draws a
+# cjk-stretch widens the system font's characters (default 1.135, 0.5 to 2): a terminal that draws a
 # picture taller than it is, as one with cells of 1 by 2.27 does at the default cell aspect, makes
-# square characters tall, and 1.135 makes them square again there. cjk-scale sizes them (default 1,
-# 0.5 to 2), to match the terminal's own Chinese text.
-[[ $cjk_stretch =~ ^[0-9]+([.][0-9]+)?$ ]] || cjk_stretch=1
-[[ $cjk_scale =~ ^[0-9]+([.][0-9]+)?$ ]] || cjk_scale=1
+# square characters tall, and 1.135 makes them square again there; 1 is for cells of 1 by 2.
+# cjk-scale sizes them (default 0.8, 0.5 to 2), to match the terminal's own Chinese text.
+[[ $cjk_stretch =~ ^[0-9]+([.][0-9]+)?$ ]] || cjk_stretch=1.135
+[[ $cjk_scale =~ ^[0-9]+([.][0-9]+)?$ ]] || cjk_scale=0.8
 read -r cjk_stretch cjk_scale < <(LC_ALL=C awk -v s="$cjk_stretch" -v z="$cjk_scale" 'BEGIN {
   if (s < 0.5) s = 0.5; if (s > 2) s = 2; if (z < 0.5) z = 0.5; if (z > 2) z = 2; printf "%.3f %.3f\n", s, z
 }')

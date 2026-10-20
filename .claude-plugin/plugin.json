@@ -66,14 +66,14 @@
     "cjkStretch": {
       "type": "number",
       "title": "Width of Chinese in formulas",
-      "description": "Widens the Chinese characters set in a system font, from 0.5 to 2. In a terminal that draws pictures taller than they are, it keeps them square: 1.135 for cells of 1 by 2.27 at a cell aspect of 2.",
-      "default": 1
+      "description": "Widens the Chinese characters set in a system font, from 0.5 to 2. In a terminal that draws pictures taller than they are, it keeps them square: the default 1.135 is for cells of 1 by 2.27 at a cell aspect of 2, and 1 is for cells of 1 by 2.",
+      "default": 1.135
     },
     "cjkScale": {
       "type": "number",
       "title": "Size of Chinese in formulas",
       "description": "The size of the Chinese characters set in a system font, from 0.5 to 2, to match the terminal's own Chinese text.",
-      "default": 1
+      "default": 0.8
     },
     "cacheSizeMB": {
       "type": "number",
