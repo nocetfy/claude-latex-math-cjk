@@ -52,13 +52,22 @@ read -r cx rx <<<"$(render '\(x\)' x inline)"
 read -r ch rh <<<"$(printf '%s' '\(x\)' | LATEX_MATH_RESOLUTION=2 bin/render.sh "$cache" x-hires d8d8d8 inline)"
 [[ $(size "$cache/x-hires.png") == "$((ch * 40)) $((rh * 80))" ]] || fail "resolution 2 does not double the cell"
 
+read -r ca ra <<<"$(printf '%s' '\(x\)' | LATEX_MATH_CELL_ASPECT=2.27 bin/render.sh "$cache" x-tall d8d8d8 inline)"
+[[ $(size "$cache/x-tall.png") == "$((ca * 20)) 45" ]] || fail "cell aspect 2.27 does not make a cell 45 pixels tall"
+
 read -r cz rz <<<"$(render '\[ \text{补偿} = \alpha \le x \]' cjk)"
 ((cz > 0 && rz > 0)) || fail "a formula with Chinese text does not render"
 [[ $(render '\(\text{金额} \le x\)' cjk-inline inline) == *' 1' ]] || fail "inline Chinese text takes more than one row"
 printf '%s' '\[ \text{补偿} = \alpha \]' | bin/render.sh "$cache" cjk-bold d8d8d8 display 1 bold >/dev/null ||
   fail "a bold formula with Chinese text does not render"
-if error=$(render '\[ \text{補} \]' cjk-traditional 2>&1); then
+if error=$(LATEX_MATH_CJK_FONT='' render '\[ \text{補} \]' cjk-traditional 2>&1); then
   fail "a character outside gbsn renders, so it would be drawn wrong or dropped"
+fi
+if [[ $(uname) == Darwin ]] && command -v xelatex >/dev/null 2>&1 && command -v pdftocairo >/dev/null 2>&1; then
+  # PingFang SC has the traditional characters that gbsn lacks.
+  render '\[ \text{補} \]' cjk-pingfang >/dev/null || fail "PingFang SC does not render a traditional character"
+  read -r cpb rpb <<<"$(render '\(\text{金额} \le x\)' cjk-pingfang-bold inline 1 bold)"
+  ((rpb == 1)) || fail "bold inline Chinese text in PingFang SC takes $rpb rows"
 fi
 
 touch -t 200001010000 "$cache/euler.png"

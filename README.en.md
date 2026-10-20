@@ -55,6 +55,10 @@ Chinese and Japanese text in a formula, such as `\text{补偿金额} \le x`, is 
 
 It needs two more TeX Live packages, `cjk` and `arphic`. `install.sh` installs them with everything else.
 
+On macOS with `xelatex` and `pdftocairo` (poppler), a formula with Chinese is set by XeLaTeX instead, the Chinese in the system font PingFang SC, which has traditional characters too. `LATEX_MATH_CJK_FONT` names another system font (and turns this on elsewhere); set to the empty string, it keeps `gbsn` always.
+
+A terminal whose cells are not 1 by 2 (Noto Sans Mono's are 1 by 2.27) stretches formulas. `LATEX_MATH_CELL_ASPECT`, the cell's height over its width (default 2), corrects that. After changing either variable, clear the old pictures in `~/.cache/claude-latex-math`.
+
 ## Requirements
 
 - Claude Code 2.1.287 or later, which runs mods. The mod is tested with 2.1.289.

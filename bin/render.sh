@@ -71,27 +71,51 @@ fi
 # 262 dpi makes 11pt of TeX one row tall, so 10pt math has the x-height of the terminal's text.
 # BASELINE is where a monospace font puts its baseline in the cell, in pixels from the top.
 # SQUEEZE is how many pixels over whole cells an inline formula is pressed into them.
-read -r CELL_W CELL_H DPI PAD_Y BASELINE SQUEEZE < <(LC_ALL=C awk -v r="$res" -v s="$scale" -v m="$mode" 'BEGIN {
+# LATEX_MATH_CELL_ASPECT is the cell's height over its width (default 2, 1 to 3): Noto Sans Mono, for
+# one, has cells of 1 by 2.27, and a picture made for 1 by 2 is drawn about 12% too tall there.
+aspect=${LATEX_MATH_CELL_ASPECT:-2}
+[[ $aspect =~ ^[0-9]+([.][0-9]+)?$ ]] || aspect=2
+read -r CELL_W CELL_H DPI PAD_Y BASELINE SQUEEZE < <(LC_ALL=C awk -v r="$res" -v s="$scale" -v m="$mode" -v a="$aspect" 'BEGIN {
   z = (m == "display") ? s : 1; if (z < 0.5) z = 0.5; if (z > 2) z = 2
-  printf "%d %d %d %d %d %d\n", 20 * r + 0.5, 40 * r + 0.5, 262 * r * z + 0.5, 4 * r + 0.5, 31 * r + 0.5, 4 * r + 0.5
+  if (a < 1) a = 1; if (a > 3) a = 3
+  printf "%d %d %d %d %d %d\n", 20 * r + 0.5, 20 * a * r + 0.5, 262 * r * z + 0.5, 4 * r + 0.5, 15.5 * a * r + 0.5, 4 * r + 0.5
 }')
 
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 mkdir -p "$cache"
 
-# pdfTeX has no font for Chinese. Each run of Chinese or Japanese characters is set as text in a CJK
-# environment of CJKutf8, from the Arphic font gbsn (TeX Live packages cjk and arphic); its active
-# characters only typeset characters. Every other character stays as it was, and a character that
-# the font lacks is an error, so no character is dropped or drawn wrong. A formula without such a
-# run gets the same file as before.
+# pdfTeX has no font for Chinese. Each run of Chinese or Japanese characters is set as text, and every
+# other character stays as it was. A character that the font lacks is an error, so no character is
+# dropped or drawn wrong, and a formula without such a run gets the same file as before.
+# With a system font, the formula is set by XeLaTeX and the runs in that font: LATEX_MATH_CJK_FONT
+# names it, and on macOS it is PingFang SC when the variable is unset. pdftocairo makes the picture.
+# Without one (the variable empty, another system, or no xelatex or pdftocairo), each run is set in a
+# CJK environment of CJKutf8, from the Arphic font gbsn (TeX Live packages cjk and arphic); its active
+# characters only typeset characters.
+cjk_font=${LATEX_MATH_CJK_FONT-}
+[[ -n ${LATEX_MATH_CJK_FONT+set} || $(uname) != Darwin ]] || cjk_font='PingFang SC'
+command -v xelatex >/dev/null 2>&1 && command -v pdftocairo >/dev/null 2>&1 || cjk_font=''
 cat >"$work/body.tex"
-packages=''
-if [[ -n $(LC_ALL=C tr -d '\000-\177' <"$work/body.tex") ]] &&
-  perl -CSD -pe 's/([\p{Han}\p{Hiragana}\p{Katakana}\x{3000}-\x{303F}\x{FF00}-\x{FFEF}]+)/{\\text{\\begin{CJK}{UTF8}{gbsn}$1\\end{CJK}}}/g' \
+engine=latex packages=''
+if [[ -n $(LC_ALL=C tr -d '\000-\177' <"$work/body.tex") ]]; then
+  if [[ -n $cjk_font ]]; then
+    wrap='{\\text{\\cjkfont $1}}'
+  else
+    wrap='{\\text{\\begin{CJK}{UTF8}{gbsn}$1\\end{CJK}}}'
+  fi
+  if perl -CSD -pe 's/([\p{Han}\p{Hiragana}\p{Katakana}\x{3000}-\x{303F}\x{FF00}-\x{FFEF}]+)/'"$wrap"'/g' \
     <"$work/body.tex" >"$work/cjk.tex" && ! cmp -s "$work/body.tex" "$work/cjk.tex"; then
-  mv "$work/cjk.tex" "$work/body.tex"
-  packages='\usepackage{CJKutf8}\tracinglostchars=3'
+    mv "$work/cjk.tex" "$work/body.tex"
+    if [[ -n $cjk_font ]]; then
+      engine=xelatex
+      # The name goes into TeX, so it may hold only letters, digits, spaces, dashes and dots.
+      [[ $cjk_font =~ ^[A-Za-z0-9\ .-]+$ ]] || { echo "not a font name: $cjk_font" >&2; exit 2; }
+      packages="\\usepackage{fontspec,xcolor}\\tracinglostchars=3\\newfontfamily\\cjkfont{$cjk_font}"
+    else
+      packages='\usepackage{CJKutf8}\tracinglostchars=3'
+    fi
+  fi
 fi
 
 {
@@ -101,7 +125,13 @@ fi
     printf '%s\n' '\AtBeginDocument{\boldmath}'
   fi
   [[ -z $packages ]] || printf '%s\n' "$packages"
-  if [[ $mode == inline ]]; then
+  if [[ $engine == xelatex && $mode == inline ]]; then
+    # The box's height and depth go to the log; the 4pt border keeps ink that leaves the box.
+    printf '%s\n' '\usepackage[active,tightpage]{preview}\setlength{\PreviewBorder}{4pt}' \
+      '\begin{document}\sbox0{\color[HTML]{'"$fg"'}'
+    cat "$work/body.tex"
+    printf '%s\n' '}\typeout{MATHBOX \the\ht0/\the\dp0}\begin{preview}\usebox0\end{preview}\end{document}'
+  elif [[ $mode == inline ]]; then
     # preview's tight page is what lets dvipng report the formula's height and depth.
     printf '%s\n' '\usepackage[active,tightpage]{preview}\setlength{\PreviewBorder}{0pt}' \
       '\begin{document}\begin{preview}'
@@ -109,6 +139,7 @@ fi
     printf '%s\n' '\end{preview}\end{document}'
   else
     printf '%s\n' '\begin{document}'
+    [[ $engine == latex ]] || printf '%s\n' '\color[HTML]{'"$fg"'}'
     cat "$work/body.tex"
     printf '\n%s\n' '\end{document}'
   fi
@@ -117,13 +148,13 @@ fi
 # A formula that never ends is stopped after 20 seconds. macOS has no timeout unless coreutils is
 # installed, and then it is gtimeout.
 if command -v timeout >/dev/null 2>&1; then
-  run_latex() { timeout 20 latex "$@"; }
+  run_latex() { timeout 20 "$engine" "$@"; }
   run_dvipng() { timeout 20 dvipng "$@"; }
 elif command -v gtimeout >/dev/null 2>&1; then
-  run_latex() { gtimeout 20 latex "$@"; }
+  run_latex() { gtimeout 20 "$engine" "$@"; }
   run_dvipng() { gtimeout 20 dvipng "$@"; }
 else
-  run_latex() { latex "$@"; }
+  run_latex() { "$engine" "$@"; }
   run_dvipng() { dvipng "$@"; }
 fi
 
@@ -132,16 +163,34 @@ fi
 if ! (cd "$work" && export openin_any=p openout_any=p &&
   run_latex -no-shell-escape -interaction=nonstopmode -halt-on-error f.tex >/dev/null 2>&1); then
   # TeX writes a missing character as its raw byte, which is not UTF-8, so tr reads bytes.
-  { grep -m1 -A1 '^!' "$work/f.log" 2>/dev/null || echo 'latex did not run'; } | LC_ALL=C tr '\n' ' ' >&2
+  { grep -m1 -A1 '^!' "$work/f.log" 2>/dev/null || echo "$engine did not run"; } | LC_ALL=C tr '\n' ' ' >&2
   exit 1
 fi
 
-color=$(LC_ALL=C awk -v r=$((16#${fg:0:2})) -v g=$((16#${fg:2:2})) -v b=$((16#${fg:4:2})) \
-  'BEGIN { printf "rgb %.3f %.3f %.3f", r / 255, g / 255, b / 255 }')
-if ! run_dvipng -D "$DPI" -T tight --depth --height --truecolor --nogs -bg Transparent -fg "$color" \
-  -o "$work/f.png" "$work/f.dvi" >"$work/dvipng.log" 2>&1; then
-  head -c 300 "$work/dvipng.log" >&2
-  exit 1
+if [[ $engine == xelatex ]]; then
+  if ! pdftocairo -png -singlefile -transp -r "$DPI" "$work/f.pdf" "$work/raw" >"$work/dvipng.log" 2>&1; then
+    head -c 300 "$work/dvipng.log" >&2
+    exit 1
+  fi
+  # The crop to the ink, as dvipng -T tight does it.
+  read -r tw th tx ty < <(identify -format '%@\n' "$work/raw.png" | tr 'x+' '  ')
+  convert "$work/raw.png" -crop "${tw}x${th}+${tx}+${ty}" +repage "PNG32:$work/f.png"
+  if [[ $mode == inline ]]; then
+    # The baseline is the border and the box's height below the page's top; 72.27 TeX points are an inch.
+    read -r bh bd < <(sed -n 's|^MATHBOX \([0-9.]*\)pt/\([0-9.]*\)pt.*|\1 \2|p' "$work/f.log")
+    [[ -n ${bh-} ]] || { echo 'xelatex reported no box' >&2; exit 1; }
+    LC_ALL=C awk -v h="$bh" -v dpi="$DPI" -v ty="$ty" -v th="$th" 'BEGIN {
+      b = int((4 + h) * dpi / 72.27 + 0.5); printf "depth=%d height=%d\n", ty + th - b, b - ty
+    }' >"$work/dvipng.log"
+  fi
+else
+  color=$(LC_ALL=C awk -v r=$((16#${fg:0:2})) -v g=$((16#${fg:2:2})) -v b=$((16#${fg:4:2})) \
+    'BEGIN { printf "rgb %.3f %.3f %.3f", r / 255, g / 255, b / 255 }')
+  if ! run_dvipng -D "$DPI" -T tight --depth --height --truecolor --nogs -bg Transparent -fg "$color" \
+    -o "$work/f.png" "$work/f.dvi" >"$work/dvipng.log" 2>&1; then
+    head -c 300 "$work/dvipng.log" >&2
+    exit 1
+  fi
 fi
 
 read -r w h < <(identify -format '%w %h\n' "$work/f.png")
