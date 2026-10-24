@@ -150,7 +150,7 @@ Inline math (`$...$`) is written as Unicode text, so keep it to short expression
 **提示说某个工具没找到。** 按[要求](#要求)里的表格安装提示里列出的工具，然后新开会话。想自己查缺什么，可以运行检查命令，路径里换成你安装的版本：
 
 ```bash
-bash ~/.claude/plugins/cache/claude-latex-math-cjk/latex-math/0.4.0-cjk.1/bin/render.sh --check
+bash ~/.claude/plugins/cache/claude-latex-math-cjk/latex-math/0.4.0-cjk.2/bin/render.sh --check
 ```
 
 所有工具和宏包都齐全时，这个命令输出一个空行，退出码为 0。

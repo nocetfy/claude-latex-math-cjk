@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.4.0-cjk.2 (2026-10-24)
 
 ### Added
 

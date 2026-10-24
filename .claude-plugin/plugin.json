@@ -1,6 +1,6 @@
 {
   "name": "latex-math",
-  "version": "0.4.0-cjk.1",
+  "version": "0.4.0-cjk.2",
   "description": "Typesets the LaTeX math in Claude's replies as images in the terminal, through the kitty graphics protocol. Chinese and Japanese text in formulas is typeset too.",
   "author": {
     "name": "nocetfy"
