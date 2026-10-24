@@ -25,7 +25,7 @@ const INDENT = 2
 // How long a colour read stands, so a theme change reaches the next reply and a redraw stays cheap.
 const COLOUR_MS = 5000
 // A reply that needs more LaTeX runs than this is drawn as Unicode text, so a long derivation starts no flood of them.
-const MAX_FORMULAS = 60
+const MAX_FORMULAS = 200
 
 function section(inlineMath: Settings['inline']) {
   const inlineText =

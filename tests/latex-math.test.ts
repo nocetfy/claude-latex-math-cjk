@@ -640,24 +640,24 @@ test('across ssh, the pictures travel as bytes', async ($, on) => {
   expect(byteReads).toEqual([`${CACHE}/${stemOf('ffffff', '\\[ y \\]')}.png`])
 })
 
-test('a reply that needs more than 60 LaTeX runs is written as Unicode text', async ($, on) => {
+test('a reply that needs more than 200 LaTeX runs is written as Unicode text', async ($, on) => {
   const { renders } = machine(on)
   engineDraws(on)
-  const many = Array.from({ length: 61 }, (_, i) => `$x_{${i}}$`).join(' ')
+  const many = Array.from({ length: 201 }, (_, i) => `$x_{${i}}$`).join(' ')
   const ui = await $.ui.mount({ ...MESSAGE, props: { text: many, isFirstOfReply: true } })
   expect(await ui.find({ type: 'Text', text: `engine: ${inline(many)}` })).toBeDefined()
   expect(renders()).toEqual([])
-  // 61 copies of one formula need one run.
-  const copies = Array.from({ length: 61 }, () => '$x$').join(' ')
+  // 201 copies of one formula need one run.
+  const copies = Array.from({ length: 201 }, () => '$x$').join(' ')
   const again = await $.ui.mount({ ...MESSAGE, requestId: 'message-2', props: { text: copies, isFirstOfReply: true } })
-  expect((await again.findAll({ type: 'Image' })).length).toBe(61)
+  expect((await again.findAll({ type: 'Image' })).length).toBe(201)
   expect(renders().length).toBe(1)
 })
 
 test('with inline=unicode, inline formulas count for no LaTeX run', { options: { inline: 'unicode' } }, async ($, on) => {
   const { renders } = machine(on)
   engineDraws(on)
-  const text = `${Array.from({ length: 61 }, (_, i) => `$x_{${i}}$`).join(' ')}\n\n$$y$$`
+  const text = `${Array.from({ length: 201 }, (_, i) => `$x_{${i}}$`).join(' ')}\n\n$$y$$`
   const ui = await $.ui.mount({ ...MESSAGE, props: { text, isFirstOfReply: true } })
   expect((await ui.findAll({ type: 'Image' })).map(image => image.props.alt)).toEqual(['$$y$$'])
   expect(renders().length).toBe(1)

@@ -113,7 +113,7 @@ Change the options in `/config`, where each option is one row under the plugin's
 - **Formulas that are not rendered.** A formula that LaTeX rejects, or that has a command outside the [list of math commands](#formulas-are-untrusted-input), shows its source. A display formula also shows the reason below the source.
 - **Text that stays text.** Prices such as `$5 and $10`, code spans and code fences are not math.
 
-When the mod writes math as text, inline and display math become Unicode. A display formula that Unicode cannot hold, such as a matrix, becomes a LaTeX code block. A reply that needs more than 60 different formulas typeset is always written as text, so that one long derivation does not start 60 LaTeX runs.
+When the mod writes math as text, inline and display math become Unicode. A display formula that Unicode cannot hold, such as a matrix, becomes a LaTeX code block. A reply that needs more than 200 different formulas typeset is always written as text, so that one long derivation does not start 200 LaTeX runs.
 
 ## What the mod tells Claude
 
